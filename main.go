@@ -15,6 +15,30 @@ func main() {
 	fmt.Println("Вітаємо у грі MATH-COR!")
 	time.Sleep(2 * time.Second)
 
+	for {
+		menu()
+
+		punct := ""
+		fmt.Scan(&punct)
+
+		switch punct {
+		case "1":
+			play()
+		case "2":
+			fmt.Println("Рейтинг в розробці")
+		case "3":
+			return
+		default:
+			fmt.Println("Зробіть коректний вибір")
+		}
+	}
+
+}
+
+func menu() {
+	fmt.Println("1. Почати гру")
+	fmt.Println("2. Переглянути рейтинг")
+	fmt.Println("3. Вийти")
 }
 
 func play() {

@@ -3,17 +3,21 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"prj-go/domain"
 	"strconv"
 	"time"
 )
 
 var points int = 50
+var id uint64 = 1
 
 const pointsPerQuestion = 50
 
 func main() {
 	fmt.Println("Вітаємо у грі MATH-COR!")
 	time.Sleep(2 * time.Second)
+
+	var users []domain.User
 
 	for {
 		menu()
@@ -23,9 +27,12 @@ func main() {
 
 		switch punct {
 		case "1":
-			play()
+			u := play()
+			users = append(users, u)
 		case "2":
-			fmt.Println("Рейтинг в розробці")
+			for i, user := range users {
+
+			}
 		case "3":
 			return
 		default:
@@ -41,7 +48,7 @@ func menu() {
 	fmt.Println("3. Вийти")
 }
 
-func play() {
+func play() domain.User {
 	for i := 5; i >= 0; i-- {
 		fmt.Println(i)
 		time.Sleep(1 * time.Second)
@@ -75,6 +82,18 @@ func play() {
 	endTime := time.Now()
 	gameTime := endTime.Sub(startTime)
 
-	fmt.Printf("Який ти молодець! Впорався всього то за %v", gameTime)
-	time.Sleep(10 * time.Second)
+	fmt.Printf("Який ти молодець! Впорався всього то за %v\n", gameTime)
+	fmt.Println("Введіть ім'я:")
+
+	name := ""
+	fmt.Scan(&name)
+
+	user := domain.User{
+		Id:   id,
+		Name: name,
+		Time: gameTime,
+	}
+	id++
+
+	return user
 }

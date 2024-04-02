@@ -22,6 +22,14 @@ func main() {
 	fmt.Println("Вітаємо у грі MATH-COR!")
 	time.Sleep(2 * time.Second)
 
+	var users []domain.User
+	users = getUsers()
+	for _, user := range users {
+		if user.Id >= id {
+			id = user.Id + 1
+		}
+	}
+
 	for {
 		menu()
 
@@ -31,14 +39,14 @@ func main() {
 		switch punct {
 		case "1":
 			u := play()
-			users := getUsers()
+			users = getUsers()
 			users = append(users, u)
 			sortAndSave(users)
 		case "2":
-			users := getUsers()
+			users = getUsers()
 			for i, user := range users {
-				fmt.Printf("i: %v, Name: %s, Time: %v\n",
-					i, user.Name, user.Time)
+				fmt.Printf("i: %v, Id: %v Name: %s, Time: %v\n",
+					i, user.Id, user.Name, user.Time)
 			}
 		case "3":
 			return

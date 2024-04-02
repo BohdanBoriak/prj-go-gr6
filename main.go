@@ -1,23 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"prj-go/domain"
+	"sort"
 	"strconv"
 	"time"
 )
 
-var points int = 50
 var id uint64 = 1
 
-const pointsPerQuestion = 50
+const (
+	pointsPerQuestion = 50
+	totalPoints       = 50
+)
 
 func main() {
 	fmt.Println("Вітаємо у грі MATH-COR!")
 	time.Sleep(2 * time.Second)
-
-	var users []domain.User
 
 	for {
 		menu()
@@ -28,10 +31,14 @@ func main() {
 		switch punct {
 		case "1":
 			u := play()
+			users := getUsers()
 			users = append(users, u)
+			sortAndSave(users)
 		case "2":
+			users := getUsers()
 			for i, user := range users {
-
+				fmt.Printf("i: %v, Name: %s, Time: %v\n",
+					i, user.Name, user.Time)
 			}
 		case "3":
 			return
@@ -39,7 +46,6 @@ func main() {
 			fmt.Println("Зробіть коректний вибір")
 		}
 	}
-
 }
 
 func menu() {
@@ -49,12 +55,13 @@ func menu() {
 }
 
 func play() domain.User {
-	for i := 5; i >= 0; i-- {
+	for i := 3; i > 0; i-- {
 		fmt.Println(i)
 		time.Sleep(1 * time.Second)
 	}
 
 	myPoints := 0
+	points := totalPoints
 	startTime := time.Now()
 	for points > 0 {
 		x, y := rand.Intn(100), rand.Intn(100)
@@ -96,4 +103,70 @@ func play() domain.User {
 	id++
 
 	return user
+}
+
+func sortAndSave(users []domain.User) {
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Time < users[j].Time
+	})
+
+	file, err := os.OpenFile("users.json", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		fmt.Printf("os.OpenFile: %s", err)
+		return
+	}
+
+	defer func(f *os.File) {
+		err = f.Close()
+		if err != nil {
+			fmt.Printf("f.Close(): %s", err)
+		}
+	}(file)
+
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(users)
+	if err != nil {
+		fmt.Printf("encoder.Encode(users): %s", err)
+		return
+	}
+}
+
+func getUsers() []domain.User {
+	var users []domain.User
+
+	info, err := os.Stat("users.json")
+	if err != nil {
+		if os.IsNotExist(err) {
+			_, err := os.Create("users.json")
+			if err != nil {
+				fmt.Printf("os.Create: %s", err)
+				return nil
+			}
+			return nil
+		}
+	}
+
+	if info.Size() != 0 {
+		file, err := os.Open("users.json")
+		if err != nil {
+			fmt.Printf("os.Open: %s", err)
+			return nil
+		}
+
+		defer func(f *os.File) {
+			err = f.Close()
+			if err != nil {
+				fmt.Printf("f.Close(): %s", err)
+			}
+		}(file)
+
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&users)
+		if err != nil {
+			fmt.Printf("decoder.Decode: %s", err)
+			return nil
+		}
+	}
+
+	return users
 }
